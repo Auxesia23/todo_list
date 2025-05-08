@@ -1,0 +1,72 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/Auxesia23/todo_list/internal/repository"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+)
+
+type application struct{
+	Config config
+	User repository.UserRepository
+}
+
+type config struct {
+	addr string
+}
+
+func (app *application) mount () http.Handler {
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(cors.Handler(cors.Options{
+			AllowedOrigins: []string{"https://*", "http://*"},
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: false,
+			MaxAge:           300, 
+		}))
+	
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
+	
+	r.Route("/v1", func(r chi.Router){
+		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("OK"))
+		})
+		
+		r.Route("/auth", func(r chi.Router){
+			r.Post("/register", app.RegisterUser)
+			r.Post("/login", app.UserLogin)
+		})
+		
+		r.Route("/protected",  func(r chi.Router) {
+			r.Use(UserAuth)
+			r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+				email := r.Context().Value("userEmail").(string)
+				w.Write([]byte("Authenticated "+ email))
+			})
+		})
+	})
+
+	return r
+}
+
+func (app *application) run(mux http.Handler) error {
+	srv := &http.Server{
+			Addr:    app.Config.addr,
+			Handler: mux,
+		}
+
+		log.Println("Server running on port" + app.Config.addr)
+
+		return srv.ListenAndServe()
+}
