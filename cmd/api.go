@@ -13,6 +13,7 @@ import (
 type application struct{
 	Config config
 	User repository.UserRepository
+	Todo repository.TodoRepository
 }
 
 type config struct {
@@ -34,10 +35,6 @@ func (app *application) mount () http.Handler {
 			MaxAge:           300, 
 		}))
 	
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
-	})
-	
 	r.Route("/v1", func(r chi.Router){
 		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("OK"))
@@ -48,12 +45,10 @@ func (app *application) mount () http.Handler {
 			r.Post("/login", app.UserLogin)
 		})
 		
-		r.Route("/protected",  func(r chi.Router) {
+		r.Route("/todo",  func(r chi.Router) {
 			r.Use(UserAuth)
-			r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-				email := r.Context().Value("userEmail").(string)
-				w.Write([]byte("Authenticated "+ email))
-			})
+			r.Post("/", app.CreateTodo)
+			r.Get("/", app.GetAllTodos)
 		})
 	})
 

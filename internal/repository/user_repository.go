@@ -40,7 +40,7 @@ func (repo *UserRepo) Create (ctx context.Context, user models.User) (models.Use
 	
 	//Mengambil data user yang baru dibuat
 	var newUser models.User
-	err = repo.DB.WithContext(ctx).First(&newUser, user.ID).Error
+	err = repo.DB.WithContext(ctx).Where("email = ?", user.Email).First(&newUser).Error
 	if err != nil {
 		return models.UserResponse{}, err
 	}

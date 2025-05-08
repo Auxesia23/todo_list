@@ -11,7 +11,7 @@ import (
 
 
 func (app *application) RegisterUser (w http.ResponseWriter, r *http.Request){
-	//Decode request body 
+	//Decode request body dan bind ke variabel
 	var userInput models.UserInput
 	err := json.NewDecoder(r.Body).Decode(&userInput)
 	if err != nil {
@@ -47,7 +47,7 @@ func (app *application) RegisterUser (w http.ResponseWriter, r *http.Request){
 }
 
 func (app *application) UserLogin(w http.ResponseWriter, r *http.Request){
-	//Decode request body 
+	//Decode request body dan bind ke variabel
 	var loginInput models.UserLogin
 	err := json.NewDecoder(r.Body).Decode(&loginInput)
 	if err != nil {

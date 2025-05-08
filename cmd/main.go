@@ -17,6 +17,7 @@ func main() {
 	
 	db := database.InitDB()
 	UserRepo := repository.NewUserRepository(db)
+	TodoRepo := repository.NewTodoRepository(db)
 	
 	cfg := config{
 			addr: os.Getenv("PORT"),
@@ -25,6 +26,7 @@ func main() {
 	app := &application{
 		Config : cfg,
 		User: UserRepo,
+		Todo: TodoRepo,
 	}
 	
 	mux := app.mount()
