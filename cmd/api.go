@@ -49,6 +49,7 @@ func (app *application) mount () http.Handler {
 			r.Use(UserAuth)
 			r.Post("/", app.CreateTodo)
 			r.Get("/", app.GetAllTodos)
+			r.Put("/{id}", app.UpdateTodo)
 		})
 	})
 
