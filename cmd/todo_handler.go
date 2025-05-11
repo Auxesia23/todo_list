@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,7 +16,6 @@ func (app *application) CreateTodo (w http.ResponseWriter, r *http.Request){
 	//ambil email user yang melakukan request dari context yang dikirim middleware
 	userEmail := r.Context().Value("userEmail").(string)
 	
-	log.Println(r.Body)
 	
 	//Decode request body dan bind ke variabel
 	var todoInput models.TodoInput

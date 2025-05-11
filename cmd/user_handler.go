@@ -66,3 +66,16 @@ func (app *application) UserLogin(w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
+
+func (app *application) UserInfo (w http.ResponseWriter, r *http.Request){
+	userEmail := r.Context().Value("userEmail").(string)
+	user, err := app.User.Get(context.Background(), userEmail)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}

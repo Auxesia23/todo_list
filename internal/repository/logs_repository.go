@@ -46,6 +46,7 @@ func (repo *LogsRepo) GetAll(ctx context.Context) ([]models.LogEntry, error) {
 	err := repo.DB.WithContext(ctx).
 		Where("timestamp >= ? AND timestamp < ?", startOfDay, endOfDay).
 		Order("timestamp DESC").
+		Limit(50).
 		Find(&logs).Error
 
 	return logs, err

@@ -16,6 +16,7 @@ func GenerateToken(user *models.User) (string, error) {
 	jwtSecret = []byte(secretKey)
 	claims := jwt.MapClaims{
 		"email": user.Email,
+		"admin" : user.Admin,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 		"iat":   time.Now().Unix(),
 	}

@@ -48,6 +48,11 @@ func (app *application) mount () http.Handler {
 			r.Post("/login", app.UserLogin)
 		})
 		
+		r.Route("/user", func(r chi.Router){
+			r.Use(UserAuth)
+			r.Get("/info", app.UserInfo)
+		})
+		
 		r.Route("/todo",  func(r chi.Router) {
 			r.Use(UserAuth)
 			r.Post("/", app.CreateTodo)
@@ -57,6 +62,7 @@ func (app *application) mount () http.Handler {
 		})
 		
 		r.Route("/logs", func(r chi.Router){
+			r.Use(AdminAuth)
 			r.Get("/", app.GetAllLogs)
 		})
 	})

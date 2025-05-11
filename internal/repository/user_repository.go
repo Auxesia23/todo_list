@@ -12,6 +12,7 @@ import (
 type UserRepository interface {
 	Create(ctx context.Context, user models.User) (models.UserResponse, error)
 	Login(ctx context.Context, email, password string)(string, error)
+	Get(ctx context.Context, email string)(models.UserResponse, error)
 }
 
 type UserRepo struct {
@@ -74,4 +75,20 @@ func(repo *UserRepo) Login(ctx context.Context, email, password string) (string,
 	}
 	
 	return token, nil
+}
+
+func (repo *UserRepo) Get(ctx context.Context, email string)(models.UserResponse, error){
+	var user models.User
+	err := repo.DB.WithContext(ctx).Where("email = ?",email).First(&user).Error
+	if err != nil {
+		return models.UserResponse{}, err
+	}
+	
+	response := models.UserResponse{
+		Username: &user.Username,
+		Email: &user.Email,
+		Admin: &user.Admin,
+	}
+	
+	return response,nil
 }
