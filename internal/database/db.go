@@ -32,7 +32,7 @@ func InitDB() *gorm.DB {
 	}
 
 	//menerapkan migrate models ke db
-	err = db.AutoMigrate(&models.User{},models.Todo{})
+	err = db.AutoMigrate(&models.User{},models.Todo{}, models.LogEntry{})
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}

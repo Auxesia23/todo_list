@@ -95,10 +95,12 @@ func (app *application) UpdateTodo(w http.ResponseWriter, r *http.Request){
 	//ambil email user yang melakukan request dari context yang dikirim middleware
 	userEmail := r.Context().Value("userEmail").(string)
 	
+	//conversi id dari string ke uint
 	todoId := chi.URLParam(r, "id")
 	todoIdInt, _ := strconv.ParseInt(todoId, 10, 64)
 	todoIdUint := uint(todoIdInt)
 	
+	//update status
 	response, err := app.Todo.Update(context.Background(), userEmail, todoIdUint)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -107,4 +109,23 @@ func (app *application) UpdateTodo(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+func(app *application) DeleteTodo(w http.ResponseWriter, r *http.Request){
+	//ambil email user yang melakukan request dari context yang dikirim middleware
+	userEmail := r.Context().Value("userEmail").(string)
+	
+	//conversi id dari string ke uint
+	todoId := chi.URLParam(r, "id")
+	todoIdInt, _ := strconv.ParseInt(todoId, 10, 64)
+	todoIdUint := uint(todoIdInt)
+	
+	//delete todo
+	err := app.Todo.Delete(context.Background(), userEmail, todoIdUint)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	
+	w.WriteHeader(http.StatusNoContent)
 }

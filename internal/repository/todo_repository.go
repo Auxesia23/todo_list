@@ -12,6 +12,7 @@ type TodoRepository interface{
 	GetAll(ctx context.Context, email string)([]models.TodoResponse, error)
 	GetByCompleted(ctx context.Context, email string, completed int)([]models.TodoResponse, error)
 	Update(ctx context.Context, email string, id uint)(models.TodoResponse, error)
+	Delete(ctx context.Context, email string, id uint)( error)
 }
 
 type TodoRepo struct {
@@ -136,4 +137,19 @@ func (repo *TodoRepo) Update(ctx context.Context, email string, id uint) (models
 	}
 
 	return response, nil
+}
+
+func (repo *TodoRepo) Delete(ctx context.Context, email string, id uint)(error){
+	var todo models.Todo
+	err := repo.DB.WithContext(ctx).Where("id = ? AND user_email = ?", id,email).First(&todo).Error
+	if err != nil {
+		return err
+	}
+	
+	err = repo.DB.Delete(&todo, id).Error
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }

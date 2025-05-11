@@ -14,6 +14,7 @@ type application struct{
 	Config config
 	User repository.UserRepository
 	Todo repository.TodoRepository
+	Logs repository.LogsRepository
 }
 
 type config struct {
@@ -22,9 +23,11 @@ type config struct {
 
 func (app *application) mount () http.Handler {
 	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	// r.Use(middleware.RequestID)
+	// r.Use(middleware.RealIP)
+	// r.Use(middleware.Logger)
+	
+	r.Use(app.LoggingMiddleware)
 	r.Use(middleware.Recoverer)
 	r.Use(cors.Handler(cors.Options{
 			AllowedOrigins: []string{"https://*", "http://*"},
@@ -50,6 +53,11 @@ func (app *application) mount () http.Handler {
 			r.Post("/", app.CreateTodo)
 			r.Get("/", app.GetAllTodos)
 			r.Put("/{id}", app.UpdateTodo)
+			r.Delete("/{id}", app.DeleteTodo)
+		})
+		
+		r.Route("/logs", func(r chi.Router){
+			r.Get("/", app.GetAllLogs)
 		})
 	})
 
