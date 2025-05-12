@@ -46,6 +46,8 @@ func (app *application) mount () http.Handler {
 		r.Route("/auth", func(r chi.Router){
 			r.Post("/register", app.RegisterUser)
 			r.Post("/login", app.UserLogin)
+			r.Get("/login/google", app.GoogleLogin)
+			r.Post("/google/callback", app.GoogleCallbackHandler)
 		})
 		
 		r.Route("/user", func(r chi.Router){

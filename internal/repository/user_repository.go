@@ -13,6 +13,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user models.User) (models.UserResponse, error)
 	Login(ctx context.Context, email, password string)(string, error)
 	Get(ctx context.Context, email string)(models.UserResponse, error)
+	GoogleLogin(ctx context.Context, code string) (string, error)
 }
 
 type UserRepo struct {
@@ -91,4 +92,39 @@ func (repo *UserRepo) Get(ctx context.Context, email string)(models.UserResponse
 	}
 	
 	return response,nil
+}
+
+func (repo *UserRepo) GoogleLogin(ctx context.Context, code string) (string, error) {
+	token, err := utils.ExchangeCodeForToken(code)
+	if err != nil {
+		return "", err
+	}
+
+	userInfo, err := utils.FetchGoogleUserInfo(token.AccessToken)
+	if err != nil {
+		return "", err
+	}
+
+	var user models.User
+	result := repo.DB.Where("email = ?", userInfo.Email).First(&user)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			user = models.User{
+				Username:  userInfo.Name,
+				Email: userInfo.Email,
+			}
+			if err := repo.DB.Create(&user).Error; err != nil {
+				return "", err
+			}
+		} else {
+			return "", result.Error
+		}
+	}
+
+	jwt, err := utils.GenerateToken(&user)
+	if err != nil {
+		return "", err
+	}
+	return jwt, nil
 }

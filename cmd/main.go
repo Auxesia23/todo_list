@@ -6,6 +6,7 @@ import (
 
 	"github.com/Auxesia23/todo_list/internal/database"
 	"github.com/Auxesia23/todo_list/internal/repository"
+	"github.com/Auxesia23/todo_list/internal/utils"
 	"github.com/joho/godotenv"
 )
 
@@ -19,6 +20,8 @@ func main() {
 	UserRepo := repository.NewUserRepository(db)
 	TodoRepo := repository.NewTodoRepository(db)
 	LogsRepo := repository.NewLogsRepository(db)
+	
+	utils.SetupGoogleOAuth()
 	
 	cfg := config{
 			addr: os.Getenv("PORT"),

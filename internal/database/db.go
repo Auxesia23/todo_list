@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -12,18 +11,7 @@ import (
 
 func InitDB() *gorm.DB {
 	//Load environment variabel untuk db
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASS")
-	dbname := os.Getenv("DB_NAME")
-	sslmode := "disable"
-
-	//membuat connection string dari data yang diambil dari environment variabel
-	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		host, port, user, password, dbname, sslmode,
-	)
+	dsn := os.Getenv("DB_DSN")
 
 	//membuka koneksi ke db
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

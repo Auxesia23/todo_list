@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-
+	"net/url"
+	"os"
+	"fmt"
 	"github.com/Auxesia23/todo_list/internal/models"
 	"github.com/Auxesia23/todo_list/internal/utils"
 )
@@ -78,4 +80,39 @@ func (app *application) UserInfo (w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
+}
+
+func (app *application) GoogleLogin(w http.ResponseWriter, r *http.Request) {
+	clientID := os.Getenv("GOOGLE_CLIENT_ID")
+	redirectURI := os.Getenv("GOOGLE_REDIRECT_URI")
+	scope := "email profile"
+	authURL := "https://accounts.google.com/o/oauth2/v2/auth"
+	
+	params := url.Values{}
+	params.Add("client_id", clientID)
+	params.Add("redirect_uri", redirectURI)
+	params.Add("response_type", "code")
+	params.Add("scope", scope)
+	params.Add("access_type", "offline")
+	params.Add("prompt", "consent")
+	fullURL := fmt.Sprintf("%s?%s", authURL, params.Encode())
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"url": fullURL})
+}
+
+
+func (app *application) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+
+	token, err := app.User.GoogleLogin(context.Background(), code)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
